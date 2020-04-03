@@ -31,6 +31,7 @@ void showCurrentUserData();
 // 控制主菜单页面程序
 bool isMainMenuRunning = false;
 
+
 // 接收线程
 void readTaskHandler(int clientfd);
 // 获取系统时间（聊天信息需要添加时间信息）
@@ -208,13 +209,13 @@ int main(int argc, char **argv)
 
                         // 登录成功，启动接收线程负责接收数据，该线程只启动一次
                         static int readthreadnumber = 0;
-                        if (readthreadnumber == 0)
+                        if(readthreadnumber == 0)
                         {
                             std::thread readTask(readTaskHandler, clientfd); // pthread_create
                             readTask.detach();                               // pthread_detach
                             readthreadnumber++;
                         }
-
+                        
                         // 进入聊天主菜单页面
                         isMainMenuRunning = true;
                         mainMenu(clientfd);
@@ -285,7 +286,7 @@ void readTaskHandler(int clientfd)
     for (;;)
     {
         char buffer[1024] = {0};
-        int len = recv(clientfd, buffer, 1024, 0); // 阻塞了
+        int len = recv(clientfd, buffer, 1024, 0);  // 阻塞了
         if (-1 == len || 0 == len)
         {
             close(clientfd);
@@ -486,31 +487,6 @@ void creategroup(int clientfd, string str)
     {
         cerr << "send creategroup msg error -> " << buffer << endl;
     }
-    else
-    {
-        char buffer[1024] = {0};
-        cout << "test" << endl;
-        len = recv(clientfd, buffer, 1024, 0);
-        cout << len << endl;
-        if (-1 == len)
-        {
-            cerr << "recv creategroup response error" << endl;
-        }
-        else
-        {
-            json responsejs = json::parse(buffer);
-            if (0 != responsejs["errno"])
-            {
-                // 注册失败
-                cerr << groupname << " is already existed, create error!" << endl;
-            }
-            else
-            {
-                // 注册成功
-                cout << groupname << " create success, groupid is " << responsejs["groupid"] << ",do not forget it!" << endl;
-            }
-        }
-    }
 }
 // "addgroup" command handler
 void addgroup(int clientfd, string str)
@@ -572,7 +548,7 @@ void loginout(int clientfd, string)
     else
     {
         isMainMenuRunning = false;
-    }
+    }   
 }
 
 // 获取系统时间（聊天信息需要添加时间信息）
