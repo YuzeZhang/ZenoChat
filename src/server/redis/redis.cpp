@@ -91,6 +91,28 @@ bool Redis::subscribe(int channel)
     return true;
 }
 
+// 向redis指定的通道取消订阅消息
+bool Redis::unsubscribe(int channel)
+{
+    if (REDIS_ERR == redisAppendCommand(this->_subscribe_context, "UNSUBSCRIBE %d", channel))
+    {
+        cerr << "unsubscribe command failed!" << endl;
+        return false;
+    }
+
+    // redisBufferWrite可以循环发送缓冲区，直到缓冲区数据发送完毕（done被置为1）
+    int done = 0;
+    while (!done)
+    {
+        if (REDIS_ERR == redisBufferWrite(this->_subscribe_context, &done))
+        {
+            cerr << "unsubscribe command failed!" << endl;
+            return false;
+        }
+    }
+    return true;
+}
+
 // 在独立线程中接收订阅通道中的消息
 void Redis::observer_channel_message()
 {
